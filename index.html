@@ -612,6 +612,39 @@
             transform: rotate(90deg);
         }
 
+        .modal-sequence-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .seq-arrow-btn {
+            background: rgba(0, 240, 255, 0.08);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: #00f0ff;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            user-select: none;
+        }
+
+        .seq-arrow-btn:hover {
+            background: #00f0ff;
+            color: #060613;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+            transform: scale(1.12);
+        }
+
+        .seq-arrow-btn:active {
+            transform: scale(0.92);
+        }
+
         .modal-header {
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 16px;
@@ -940,7 +973,11 @@
         <div class="modal-card">
             <button class="modal-close-btn" id="modal-close-btn" title="Close & Return to Home">&times;</button>
             <div class="modal-header">
-                <span class="modal-project-id" id="modal-project-num">PROJECT 01</span>
+                <div class="modal-sequence-nav">
+                    <button class="seq-arrow-btn" id="seq-prev-btn" title="Previous Module (←)">&#10094;</button>
+                    <span class="modal-project-id" id="modal-project-num">MODULE 01 / 14</span>
+                    <button class="seq-arrow-btn" id="seq-next-btn" title="Next Module (→)">&#10095;</button>
+                </div>
                 <h2 id="modal-project-title">NEURAL NET</h2>
             </div>
             <div class="modal-body">
@@ -1498,7 +1535,7 @@
             isModalActive = true;
             
             // Set modal values
-            modalNum.innerText = `MODULE ${proj.number}`;
+            modalNum.innerText = `MODULE ${proj.number} / ${projects.length}`;
             modalNum.style.color = proj.color;
             modalTitle.innerText = proj.title;
             modalDesc.innerText = proj.desc;
@@ -1592,9 +1629,46 @@
             });
         }
 
+        // Sequence Navigation (Forward & Backward 1-14)
+        const seqPrevBtn = document.getElementById('seq-prev-btn');
+        const seqNextBtn = document.getElementById('seq-next-btn');
+
+        function navigateSequence(direction) {
+            if (!selectedProject) return;
+            const currentIndex = projects.findIndex(p => p.id === selectedProject.id);
+            if (currentIndex === -1) return;
+
+            let targetIndex;
+            if (direction === 'prev') {
+                targetIndex = (currentIndex - 1 + projects.length) % projects.length;
+            } else {
+                targetIndex = (currentIndex + 1) % projects.length;
+            }
+
+            showProjectDetails(projects[targetIndex]);
+        }
+
+        if (seqPrevBtn) {
+            seqPrevBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navigateSequence('prev');
+            });
+        }
+
+        if (seqNextBtn) {
+            seqNextBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                navigateSequence('next');
+            });
+        }
+
         document.addEventListener('keydown', (e) => {
             if (!isModalActive) return;
-            if (e.key === 'Escape') {
+            if (e.key === 'ArrowLeft') {
+                navigateSequence('prev');
+            } else if (e.key === 'ArrowRight') {
+                navigateSequence('next');
+            } else if (e.key === 'Escape') {
                 closeModal();
             }
         });
