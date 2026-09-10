@@ -612,75 +612,6 @@
             transform: rotate(90deg);
         }
 
-        .modal-maximize-btn {
-            position: absolute;
-            top: 22px;
-            right: 72px;
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 1.6rem;
-            cursor: pointer;
-            transition: color 0.3s ease, transform 0.3s ease;
-        }
-
-        .modal-maximize-btn:hover {
-            color: #00f0ff;
-            transform: scale(1.25);
-        }
-
-        .modal-nav-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: rgba(8, 8, 24, 0.85);
-            border: 1.5px solid rgba(0, 240, 255, 0.4);
-            color: #ffffff;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 110;
-            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 240, 255, 0.25);
-            user-select: none;
-        }
-
-        .modal-nav-btn.prev-btn {
-            left: 35px;
-        }
-
-        .modal-nav-btn.next-btn {
-            right: 35px;
-        }
-
-        .modal-nav-btn:hover {
-            background: #00f0ff;
-            color: #060613;
-            border-color: #00f0ff;
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.9);
-            transform: translateY(-50%) scale(1.15);
-        }
-
-        .modal-nav-btn:active {
-            transform: translateY(-50%) scale(0.95);
-        }
-
-        @media (max-width: 1024px) {
-            .modal-nav-btn {
-                width: 42px;
-                height: 42px;
-                font-size: 1.2rem;
-            }
-            .modal-nav-btn.prev-btn { left: 12px; }
-            .modal-nav-btn.next-btn { right: 12px; }
-        }
-
         .modal-header {
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 16px;
@@ -830,29 +761,71 @@
 
         @media (max-width: 768px) {
             .navbar {
-                padding: 18px 24px;
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 8px;
+                background: rgba(6, 6, 19, 0.92);
+                backdrop-filter: blur(20px);
+                border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
             }
             .logo {
-                font-size: 1.2rem;
+                font-size: 0.95rem;
+                letter-spacing: 2px;
+                text-align: center;
             }
             .nav-links {
-                gap: 16px;
+                gap: 12px;
+                width: 100%;
+                justify-content: center;
+                border-top: 1px solid rgba(255, 255, 255, 0.08);
+                padding-top: 6px;
+            }
+            .nav-item {
+                font-size: 0.72rem;
+                letter-spacing: 1px;
+                padding: 4px 8px;
             }
             .gravity-hud {
-                left: 20px;
-                bottom: 20px;
-                width: 210px;
-                padding: 16px;
+                left: 12px;
+                bottom: 12px;
+                width: 190px;
+                padding: 14px;
             }
             .hud-readout {
-                font-size: 1.8rem;
+                font-size: 1.5rem;
+            }
+            .hud-mode {
+                font-size: 0.6rem;
+                margin-bottom: 10px;
+            }
+            .hud-btn {
+                font-size: 0.55rem;
+                padding: 6px 4px;
             }
             .btn {
-                padding: 12px 32px;
-                font-size: 0.85rem;
+                padding: 12px 24px;
+                font-size: 0.8rem;
             }
             .subtitle {
                 letter-spacing: 4px;
+            }
+            .modal-card {
+                padding: 20px;
+                width: 95%;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            #modal-project-title {
+                font-size: 1.6rem;
+            }
+            .modal-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .modal-btn {
+                width: 100%;
+                text-align: center;
             }
             #custom-cursor, #cursor-dot {
                 display: none; /* Hide custom cursor on mobile */
@@ -964,11 +937,8 @@
 
     <!-- ===== MODERN DETAILS MODAL ===== -->
     <div id="project-modal" class="modal-overlay">
-        <button class="modal-nav-btn prev-btn" id="modal-prev-btn" title="Previous Module (←)">&#10094;</button>
-        <button class="modal-nav-btn next-btn" id="modal-next-btn" title="Next Module (→)">&#10095;</button>
         <div class="modal-card">
-            <button class="modal-maximize-btn" id="modal-header-max-btn" title="Maximize View / Move to Home Screen">⤢</button>
-            <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            <button class="modal-close-btn" id="modal-close-btn" title="Close & Return to Home">&times;</button>
             <div class="modal-header">
                 <span class="modal-project-id" id="modal-project-num">PROJECT 01</span>
                 <h2 id="modal-project-title">NEURAL NET</h2>
@@ -992,7 +962,7 @@
                 </div>
             </div>
             <div class="modal-actions">
-                <button class="btn modal-btn" id="modal-maximize-btn" style="background: rgba(0, 240, 255, 0.15); border-color: #00f0ff;">MAXIMIZE TO HOME SCREEN</button>
+                <button class="btn modal-btn" id="modal-home-redirect-btn" style="background: rgba(0, 240, 255, 0.2); border-color: #00f0ff; color: #ffffff;">GO DIRECTLY TO HOME PAGE</button>
                 <a href="#" class="btn modal-btn" id="modal-project-link" target="_blank">LAUNCH ACCESS VECTOR</a>
             </div>
         </div>
@@ -1605,7 +1575,8 @@
             // Reset image source
             modalImgEl.src = '';
             
-            switchSection('WORK');
+            // Direct redirect to HOME page section
+            switchSection('HOME');
         }
 
         modalClose.addEventListener('click', closeModal);
@@ -1613,53 +1584,17 @@
             if (e.target === modal) closeModal();
         });
 
-        // Next & Previous Navigation
-        const modalPrevBtn = document.getElementById('modal-prev-btn');
-        const modalNextBtn = document.getElementById('modal-next-btn');
-
-        function navigateModal(direction) {
-            if (!selectedProject) return;
-            const currentIndex = projects.findIndex(p => p.id === selectedProject.id);
-            if (currentIndex === -1) return;
-            
-            let newIndex;
-            if (direction === 'prev') {
-                newIndex = (currentIndex - 1 + projects.length) % projects.length;
-            } else {
-                newIndex = (currentIndex + 1) % projects.length;
-            }
-            
-            showProjectDetails(projects[newIndex]);
+        const homeRedirectBtn = document.getElementById('modal-home-redirect-btn');
+        if (homeRedirectBtn) {
+            homeRedirectBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeModal();
+            });
         }
-
-        modalPrevBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            navigateModal('prev');
-        });
-
-        modalNextBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            navigateModal('next');
-        });
-
-        // Maximize to Home Screen Action
-        function handleMaximizeToHome() {
-            closeModal();
-            switchSection('HOME');
-        }
-
-        const maxBtn = document.getElementById('modal-maximize-btn');
-        const headerMaxBtn = document.getElementById('modal-header-max-btn');
-        if (maxBtn) maxBtn.addEventListener('click', handleMaximizeToHome);
-        if (headerMaxBtn) headerMaxBtn.addEventListener('click', handleMaximizeToHome);
 
         document.addEventListener('keydown', (e) => {
             if (!isModalActive) return;
-            if (e.key === 'ArrowLeft') {
-                navigateModal('prev');
-            } else if (e.key === 'ArrowRight') {
-                navigateModal('next');
-            } else if (e.key === 'Escape') {
+            if (e.key === 'Escape') {
                 closeModal();
             }
         });
