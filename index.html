@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sushmitha Singireddy — Interactive 3D Portfolio</title>
+    <title>SINGIREDDY SUSHMITHA — Interactive 3D Portfolio</title>
     <!-- Import Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -612,6 +612,23 @@
             transform: rotate(90deg);
         }
 
+        .modal-maximize-btn {
+            position: absolute;
+            top: 22px;
+            right: 72px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .modal-maximize-btn:hover {
+            color: #00f0ff;
+            transform: scale(1.25);
+        }
+
         .modal-nav-btn {
             position: absolute;
             top: 50%;
@@ -853,7 +870,7 @@
 
     <!-- ===== NAVIGATION BAR ===== -->
     <nav class="navbar">
-        <div class="logo">SUSHMITHA</div>
+        <div class="logo">SINGIREDDY SUSHMITHA</div>
         <div class="nav-links">
             <a class="nav-item active" data-section="HOME">HOME</a>
             <a class="nav-item" data-section="WORK">WORK</a>
@@ -881,7 +898,7 @@
     <!-- ===== SECTIONS ===== -->
     <div id="section-home" class="content-section active">
         <div class="content">
-            <h1>S. SUSHMITHA</h1>
+            <h1>SINGIREDDY SUSHMITHA</h1>
             <p class="subtitle">✦ PORTFOLIO ARCHIVE ✦</p>
             <a class="btn" id="explore-work-btn">EXPLORE SYSTEMS</a>
         </div>
@@ -950,6 +967,7 @@
         <button class="modal-nav-btn prev-btn" id="modal-prev-btn" title="Previous Module (←)">&#10094;</button>
         <button class="modal-nav-btn next-btn" id="modal-next-btn" title="Next Module (→)">&#10095;</button>
         <div class="modal-card">
+            <button class="modal-maximize-btn" id="modal-header-max-btn" title="Maximize View / Move to Home Screen">⤢</button>
             <button class="modal-close-btn" id="modal-close-btn">&times;</button>
             <div class="modal-header">
                 <span class="modal-project-id" id="modal-project-num">PROJECT 01</span>
@@ -974,6 +992,7 @@
                 </div>
             </div>
             <div class="modal-actions">
+                <button class="btn modal-btn" id="modal-maximize-btn" style="background: rgba(0, 240, 255, 0.15); border-color: #00f0ff;">MAXIMIZE TO HOME SCREEN</button>
                 <a href="#" class="btn modal-btn" id="modal-project-link" target="_blank">LAUNCH ACCESS VECTOR</a>
             </div>
         </div>
@@ -988,12 +1007,12 @@
         // 1. DATA DEFINITIONS
         // ============================================================
         const projects = [
-            { id: 1, number: '01', title: 'VOTE HUB', desc: 'Campus Vote Hub — An online voting system featuring user credentials verification, digital secure ballots, and database syncing to ensure reliable elections.', tech: ['Python', 'HTML5', 'CSS3', 'JavaScript', 'MongoDB'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#00f0ff', type: 'network' },
+            { id: 1, number: '01', title: 'VOTE HUB', desc: 'Campus Vote Hub — An online voting system featuring user credentials verification, digital secure ballots, and database syncing to ensure reliable elections.', tech: ['Python', 'HTML5', 'CSS3', 'JavaScript', 'MongoDB'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#00f0ff', type: 'network', certImage: 'certificates/cert-genai-nasscom.jpg' },
             { id: 2, number: '02', title: 'SERVICENOW', desc: 'Virtual Internship (ServiceNow University / SmartBridge). Handled ServiceNow Administration, Flow Designs, Telemetry Reports, Automated Test Framework (ATF), and CSA configurations.', tech: ['ServiceNow', 'Flow Designer', 'ATF', 'Reports', 'CSA'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#7b2ffc', type: 'radar', certImage: 'certificates/cert-servicenow.jpg' },
             { id: 3, number: '03', title: 'AI SYSTEM', desc: 'AI Tools & ChatGPT Workshop training (Be10X). Designed custom prompting systems, automated work flows, and investigated generative AI configurations.', tech: ['Generative AI', 'Agentic AI', 'ChatGPT', 'Prompt Engineering'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ff6fd8', type: 'quantum', certImage: 'certificates/cert-be10x.jpg' },
-            { id: 4, number: '04', title: 'WEB DEV', desc: 'Web Development Certification from Brainovision. Built responsive user interfaces and designed core templates with cross-browser compatibility.', tech: ['HTML5', 'CSS3', 'JavaScript', 'Git', 'Brainovision'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#00ff88', type: 'network' },
-            { id: 5, number: '05', title: 'ALGORITHMS', desc: 'B.Tech Core Programming Modules. Developed Object-Oriented software architectures, search/sort optimization, and structured database models.', tech: ['Java', 'Python', 'C', 'OOP', 'Data Structures'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ffaa00', type: 'cube' },
-            { id: 6, number: '06', title: 'DATABASES', desc: 'Database Management Systems and MongoDB configurations. Built schema structures, transactions logic, and optimized queries for web integrations.', tech: ['MongoDB', 'DBMS', 'SQL Queries', 'Data Normalization'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ff4444', type: 'solaris' },
+            { id: 4, number: '04', title: 'WEB DEV', desc: 'Web Development Certification from Brainovision. Built responsive user interfaces and designed core templates with cross-browser compatibility.', tech: ['HTML5', 'CSS3', 'JavaScript', 'Git', 'Brainovision'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#00ff88', type: 'network', certImage: 'certificates/cert-java.jpg' },
+            { id: 5, number: '05', title: 'ALGORITHMS', desc: 'B.Tech Core Programming Modules. Developed Object-Oriented software architectures, search/sort optimization, and structured database models.', tech: ['Java', 'Python', 'C', 'OOP', 'Data Structures'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ffaa00', type: 'cube', certImage: 'certificates/cert-dsa.jpg' },
+            { id: 6, number: '06', title: 'DATABASES', desc: 'Database Management Systems and MongoDB configurations. Built schema structures, transactions logic, and optimized queries for web integrations.', tech: ['MongoDB', 'DBMS', 'SQL Queries', 'Data Normalization'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ff4444', type: 'solaris', certImage: 'certificates/cert-servicenow.jpg' },
             { id: 7, number: '07', title: 'ZERO TRUST', desc: 'Zero Trust Cloud Security Virtual Internship (Zscaler & EduSkills). Focused on Zscaler Internet Access, Private Access, and securing corporate network perimeters in a Zero-Trust topology.', tech: ['Zero Trust', 'Cloud Security', 'Zscaler Private Access', 'Zscaler Internet Access', 'EduSkills'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#00ffcc', type: 'shield', certImage: 'certificates/cert-zerotrust.jpg' },
             { id: 8, number: '08', title: 'ANDROID DEV', desc: 'Android Developer Virtual Internship (Google for Developers & EduSkills). Implemented native Android UI designs using Jetpack Compose, Kotlin programming, and Android architecture modules.', tech: ['Android Development', 'Kotlin', 'Jetpack Compose', 'Google Developers', 'Mobile UX'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#3ddc84', type: 'mobile', certImage: 'certificates/cert-android.jpg' },
             { id: 9, number: '09', title: 'JAVA STACK', desc: 'Java Full Stack Developer Virtual Internship (EduSkills Academy & AICTE). Designed end-to-end full stack web modules incorporating database configurations, backend REST APIs, and responsive UI wrappers.', tech: ['Java Programming', 'Spring Boot', 'MySQL', 'Full Stack Dev', 'AICTE'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#f89820', type: 'stack', certImage: 'certificates/cert-java.jpg' },
@@ -1622,6 +1641,17 @@
             e.stopPropagation();
             navigateModal('next');
         });
+
+        // Maximize to Home Screen Action
+        function handleMaximizeToHome() {
+            closeModal();
+            switchSection('HOME');
+        }
+
+        const maxBtn = document.getElementById('modal-maximize-btn');
+        const headerMaxBtn = document.getElementById('modal-header-max-btn');
+        if (maxBtn) maxBtn.addEventListener('click', handleMaximizeToHome);
+        if (headerMaxBtn) headerMaxBtn.addEventListener('click', handleMaximizeToHome);
 
         document.addEventListener('keydown', (e) => {
             if (!isModalActive) return;
