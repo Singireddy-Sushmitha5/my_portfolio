@@ -612,6 +612,58 @@
             transform: rotate(90deg);
         }
 
+        .modal-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: rgba(8, 8, 24, 0.85);
+            border: 1.5px solid rgba(0, 240, 255, 0.4);
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 110;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 240, 255, 0.25);
+            user-select: none;
+        }
+
+        .modal-nav-btn.prev-btn {
+            left: 35px;
+        }
+
+        .modal-nav-btn.next-btn {
+            right: 35px;
+        }
+
+        .modal-nav-btn:hover {
+            background: #00f0ff;
+            color: #060613;
+            border-color: #00f0ff;
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.9);
+            transform: translateY(-50%) scale(1.15);
+        }
+
+        .modal-nav-btn:active {
+            transform: translateY(-50%) scale(0.95);
+        }
+
+        @media (max-width: 1024px) {
+            .modal-nav-btn {
+                width: 42px;
+                height: 42px;
+                font-size: 1.2rem;
+            }
+            .modal-nav-btn.prev-btn { left: 12px; }
+            .modal-nav-btn.next-btn { right: 12px; }
+        }
+
         .modal-header {
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 16px;
@@ -895,6 +947,8 @@
 
     <!-- ===== MODERN DETAILS MODAL ===== -->
     <div id="project-modal" class="modal-overlay">
+        <button class="modal-nav-btn prev-btn" id="modal-prev-btn" title="Previous Module (←)">&#10094;</button>
+        <button class="modal-nav-btn next-btn" id="modal-next-btn" title="Next Module (→)">&#10095;</button>
         <div class="modal-card">
             <button class="modal-close-btn" id="modal-close-btn">&times;</button>
             <div class="modal-header">
@@ -1538,6 +1592,46 @@
         modalClose.addEventListener('click', closeModal);
         modal.addEventListener('click', (e) => {
             if (e.target === modal) closeModal();
+        });
+
+        // Next & Previous Navigation
+        const modalPrevBtn = document.getElementById('modal-prev-btn');
+        const modalNextBtn = document.getElementById('modal-next-btn');
+
+        function navigateModal(direction) {
+            if (!selectedProject) return;
+            const currentIndex = projects.findIndex(p => p.id === selectedProject.id);
+            if (currentIndex === -1) return;
+            
+            let newIndex;
+            if (direction === 'prev') {
+                newIndex = (currentIndex - 1 + projects.length) % projects.length;
+            } else {
+                newIndex = (currentIndex + 1) % projects.length;
+            }
+            
+            showProjectDetails(projects[newIndex]);
+        }
+
+        modalPrevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigateModal('prev');
+        });
+
+        modalNextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigateModal('next');
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (!isModalActive) return;
+            if (e.key === 'ArrowLeft') {
+                navigateModal('prev');
+            } else if (e.key === 'ArrowRight') {
+                navigateModal('next');
+            } else if (e.key === 'Escape') {
+                closeModal();
+            }
         });
 
         // Resize the modal visualization screen canvas
@@ -2293,12 +2387,31 @@
             renderer.render(scene, camera);
         }
 
+        // Track pointer drag distance vs deliberate single click
+        let pointerStart = { x: 0, y: 0 };
+        let isDraggingScene = false;
+
+        document.addEventListener('pointerdown', (e) => {
+            pointerStart.x = e.clientX;
+            pointerStart.y = e.clientY;
+            isDraggingScene = false;
+        });
+
+        document.addEventListener('pointermove', (e) => {
+            if (e.buttons > 0) {
+                const dist = Math.hypot(e.clientX - pointerStart.x, e.clientY - pointerStart.y);
+                if (dist > 6) {
+                    isDraggingScene = true;
+                }
+            }
+        });
+
         // ============================================================
         // 11. CLICK & SELECTION ROUTER
         // ============================================================
         document.addEventListener('click', () => {
-            // Block clicks on cards if modal is already open
-            if (isModalActive) return;
+            // Block clicks on cards if modal is active or user was dragging/rotating 3D scene
+            if (isModalActive || isDraggingScene) return;
 
             raycaster.setFromCamera(mouse3D, camera);
             const intersects = raycaster.intersectObjects(projectCards, true);
