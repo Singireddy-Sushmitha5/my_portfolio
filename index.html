@@ -1,0 +1,2321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sushmitha Singireddy — Interactive 3D Portfolio</title>
+    <!-- Import Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            overflow: hidden;
+            background: #060613;
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+            cursor: none;
+            user-select: none;
+        }
+
+        /* ===== 3D CANVAS ===== */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+        }
+
+        /* ===== NAVIGATION BAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 24px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            background: linear-gradient(180deg, rgba(6, 6, 19, 0.8) 0%, rgba(6, 6, 19, 0) 100%);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.1);
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: #00f0ff;
+            text-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-item {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 6px 0;
+            cursor: pointer;
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #00f0ff;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 8px #00f0ff;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-item:hover::after, .nav-item.active::after {
+            width: 100%;
+        }
+
+        /* ===== UI CONTENT SECTIONS ===== */
+        .content-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transform: translateY(20px);
+            z-index: 2;
+        }
+
+        .content-section.active {
+            opacity: 1;
+            pointer-events: all;
+            transform: translateY(0px);
+        }
+
+        .content-section.inactive {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-20px);
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 5.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, #00f0ff, #7b2ffc, #ff6fd8, #00ff88);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientMove 6s ease-in-out infinite, floatText 4s ease-in-out infinite;
+            text-shadow: 0 0 80px rgba(0, 240, 255, 0.2);
+            letter-spacing: -1px;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #ffffff;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes gradientMove {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes floatText {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(0.85rem, 2vw, 1.2rem);
+            color: #00f0ff;
+            letter-spacing: 6px;
+            font-weight: 400;
+            margin-top: 8px;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .work-instruction {
+            max-width: 600px;
+            margin-top: 24px;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.6);
+            line-height: 1.6;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            margin-top: 2.5rem;
+            padding: 16px 44px;
+            border: 1.5px solid #00f0ff;
+            border-radius: 4px;
+            background: rgba(0, 240, 255, 0.05);
+            color: white;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            text-decoration: none;
+            display: inline-block;
+            letter-spacing: 3px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            background: #00f0ff;
+            color: #060613;
+            box-shadow: 0 0 35px rgba(0, 240, 255, 0.5);
+            transform: scale(1.05) translateY(-3px);
+            border-color: #ffffff;
+        }
+
+        /* ===== ABOUT & CONTACT CARDS ===== */
+        .about-card, .contact-card {
+            background: rgba(6, 6, 19, 0.7);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            backdrop-filter: blur(25px);
+            padding: 40px;
+            border-radius: 8px;
+            max-width: 700px;
+            width: 90%;
+            text-align: left;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(123, 47, 252, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-card::before, .contact-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #00f0ff, #7b2ffc);
+        }
+
+        .about-card h3, .contact-card h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            color: #ffffff;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            border-left: 3px solid #00f0ff;
+            padding-left: 16px;
+        }
+
+        .about-card p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 16px;
+        }
+
+        .tech-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .tech-tag {
+            background: rgba(0, 240, 255, 0.06);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            color: #00f0ff;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* ===== CONTACT FORM ===== */
+        .contact-sub {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .contact-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
+        }
+
+        .contact-details div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .contact-details a {
+            color: #00f0ff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-details a:hover {
+            color: #ff6fd8;
+            text-shadow: 0 0 5px rgba(255, 111, 216, 0.3);
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: #00f0ff;
+            background: rgba(0, 240, 255, 0.02);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.15);
+            outline: none;
+        }
+
+        .send-btn {
+            align-self: flex-start;
+            margin-top: 8px;
+        }
+
+        /* ===== GRAVITY CORE HUD ===== */
+        .gravity-hud {
+            position: fixed;
+            left: 48px;
+            bottom: 48px;
+            z-index: 10;
+            background: rgba(6, 6, 19, 0.6);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            backdrop-filter: blur(12px);
+            padding: 24px;
+            border-radius: 8px;
+            width: 250px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 8px;
+        }
+
+        .hud-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: bold;
+        }
+
+        .hud-status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ff88;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00ff88;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .hud-readout {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #00f0ff;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+            margin: 4px 0;
+            letter-spacing: 1px;
+        }
+
+        .hud-mode {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+        }
+
+        .hud-controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .hud-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .hud-btn:hover {
+            border-color: rgba(0, 240, 255, 0.5);
+            color: #00f0ff;
+            background: rgba(0, 240, 255, 0.02);
+        }
+
+        .hud-btn.active {
+            border-color: #00f0ff;
+            color: #060613;
+            background: #00f0ff;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        .hud-btn.burst {
+            grid-column: span 2;
+            border-color: rgba(255, 111, 216, 0.3);
+            color: #ff6fd8;
+        }
+
+        .hud-btn.burst:hover {
+            border-color: #ff6fd8;
+            background: rgba(255, 111, 216, 0.05);
+            box-shadow: 0 0 10px rgba(255, 111, 216, 0.2);
+        }
+
+        /* ===== CUSTOM LERP CURSOR ===== */
+        #custom-cursor {
+            position: fixed;
+            width: 32px;
+            height: 32px;
+            border: 1.5px solid #00f0ff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: width 0.3s cubic-bezier(0.19, 1, 0.22, 1), height 0.3s cubic-bezier(0.19, 1, 0.22, 1), border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        #cursor-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.45rem;
+            color: #ffffff;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        #cursor-dot {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            background: #00f0ff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 12px #00f0ff;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        /* Cursor Hover Class */
+        #custom-cursor.hovering-card {
+            width: 70px;
+            height: 70px;
+            border-color: #ff6fd8;
+            background-color: rgba(255, 111, 216, 0.05);
+            box-shadow: 0 0 30px rgba(255, 111, 216, 0.3);
+        }
+
+        #custom-cursor.hovering-card #cursor-text {
+            opacity: 1;
+            color: #ff6fd8;
+            text-shadow: 0 0 5px rgba(255, 111, 216, 0.5);
+        }
+
+        #cursor-dot.hovering-card {
+            background-color: #ff6fd8;
+            transform: translate(-50%, -50%) scale(1.5);
+            box-shadow: 0 0 15px #ff6fd8;
+        }
+
+        /* ===== SCROLL INDICATOR ===== */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            animation: bounceDown 2s ease-in-out infinite;
+            opacity: 0.4;
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            font-family: 'Orbitron', sans-serif;
+            color: #ffffff;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            text-align: center;
+        }
+
+        @keyframes bounceDown {
+            0%, 100% { transform: translateX(-50%) translateY(0px); opacity: 0.3; }
+            50% { transform: translateX(-50%) translateY(8px); opacity: 0.8; }
+        }
+
+        /* ===== MODERN DETAILS MODAL ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(4, 4, 12, 0.8);
+            backdrop-filter: blur(25px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-card {
+            background: rgba(6, 6, 19, 0.85);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            padding: 48px;
+            position: relative;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 240, 255, 0.05);
+            transform: scale(0.9) translateY(30px);
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1) translateY(0px);
+        }
+
+        .modal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, #00f0ff, #7b2ffc, #ff6fd8);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 24px;
+            right: 28px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: #ff6fd8;
+            transform: rotate(90deg);
+        }
+
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 16px;
+        }
+
+        .modal-project-id {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            color: #ff6fd8;
+            font-weight: bold;
+        }
+
+        #modal-project-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            color: #ffffff;
+            margin-top: 4px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.15);
+        }
+
+        .modal-body {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 36px;
+            align-items: center;
+        }
+
+        .modal-info {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal-desc {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .modal-section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .modal-visual {
+            position: relative;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .visual-tabs {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
+            display: flex;
+            gap: 6px;
+            background: rgba(6, 6, 19, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            border-radius: 4px;
+            padding: 3px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .visual-tab {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 3px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .visual-tab:hover {
+            color: #00f0ff;
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .visual-tab.active {
+            color: #060613;
+            background: #00f0ff;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        #modal-visual-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+            background: #020208;
+            padding: 12px;
+            transition: opacity 0.3s ease;
+        }
+
+        #modal-visual-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-start;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 24px;
+        }
+
+        .modal-btn {
+            margin-top: 0;
+            padding: 12px 32px;
+            font-size: 0.85rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .modal-visual {
+                aspect-ratio: 16 / 9;
+            }
+            .modal-card {
+                padding: 32px;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 18px 24px;
+            }
+            .logo {
+                font-size: 1.2rem;
+            }
+            .nav-links {
+                gap: 16px;
+            }
+            .gravity-hud {
+                left: 20px;
+                bottom: 20px;
+                width: 210px;
+                padding: 16px;
+            }
+            .hud-readout {
+                font-size: 1.8rem;
+            }
+            .btn {
+                padding: 12px 32px;
+                font-size: 0.85rem;
+            }
+            .subtitle {
+                letter-spacing: 4px;
+            }
+            #custom-cursor, #cursor-dot {
+                display: none; /* Hide custom cursor on mobile */
+            }
+            body {
+                cursor: default;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 3D CONTAINER ===== -->
+    <div id="canvas-container"></div>
+
+    <!-- ===== NAVIGATION BAR ===== -->
+    <nav class="navbar">
+        <div class="logo">SUSHMITHA</div>
+        <div class="nav-links">
+            <a class="nav-item active" data-section="HOME">HOME</a>
+            <a class="nav-item" data-section="WORK">WORK</a>
+            <a class="nav-item" data-section="ABOUT">ABOUT</a>
+            <a class="nav-item" data-section="CONTACT">CONTACT</a>
+        </div>
+    </nav>
+
+    <!-- ===== HUD PANEL ===== -->
+    <div class="gravity-hud">
+        <div class="hud-header">
+            <div class="hud-title">GRAVITY ENGINE</div>
+            <div class="hud-status-dot"></div>
+        </div>
+        <div class="hud-readout" id="gravity-readout">0.00 G</div>
+        <div class="hud-mode" id="gravity-mode-name">ZERO GRAVITY</div>
+        <div class="hud-controls">
+            <button class="hud-btn active" data-mode="ZERO">ZERO-G</button>
+            <button class="hud-btn" data-mode="MICRO">MICRO-G</button>
+            <button class="hud-btn" data-mode="HYPER">HYPER-G</button>
+            <button class="hud-btn burst" data-mode="BURST">BURST CORE</button>
+        </div>
+    </div>
+
+    <!-- ===== SECTIONS ===== -->
+    <div id="section-home" class="content-section active">
+        <div class="content">
+            <h1>S. SUSHMITHA</h1>
+            <p class="subtitle">✦ PORTFOLIO ARCHIVE ✦</p>
+            <a class="btn" id="explore-work-btn">EXPLORE SYSTEMS</a>
+        </div>
+    </div>
+
+    <div id="section-work" class="content-section">
+        <div class="content">
+            <h2>RESUME REGISTRY</h2>
+            <p class="subtitle">ORBITING CREDENTIALS</p>
+            <p class="work-instruction">Hover over and click any project core floating in orbit to extract system metadata. Click to inspect, grab to slow down orbits.</p>
+        </div>
+    </div>
+
+    <div id="section-about" class="content-section">
+        <div class="about-card">
+            <h3>SINGIREDDY SUSHMITHA</h3>
+            <p>Motivated Computer Science and Engineering student currently pursuing my B.Tech at Kamala Institute of Technology and Science, Singapur (4th Year, CGPA: 7.28/10).</p>
+            <p>Aspiring Software Developer with solid problem-solving skills and hands-on experience in Java, Python, C, HTML/CSS/JavaScript, MongoDB, and ServiceNow cloud frameworks. Adaptable, dedicated, and focused on clean software practices.</p>
+            <div class="tech-grid">
+                <span class="tech-tag" style="color:#00f0ff; border-color:#00f0ff44;">Java</span>
+                <span class="tech-tag" style="color:#00f0ff; border-color:#00f0ff44;">Python</span>
+                <span class="tech-tag" style="color:#00f0ff; border-color:#00f0ff44;">C Programming</span>
+                <span class="tech-tag" style="color:#7b2ffc; border-color:#7b2ffc44;">HTML & CSS</span>
+                <span class="tech-tag" style="color:#7b2ffc; border-color:#7b2ffc44;">JavaScript</span>
+                <span class="tech-tag" style="color:#ff6fd8; border-color:#ff6fd844;">MongoDB</span>
+                <span class="tech-tag" style="color:#00ff88; border-color:#00ff8844;">ServiceNow CSA</span>
+                <span class="tech-tag" style="color:#ffaa00; border-color:#ffaa0044;">Agentic AI</span>
+                <span class="tech-tag" style="color:#ff4444; border-color:#ff444444;">Git & GitHub</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="section-contact" class="content-section">
+        <div class="contact-card">
+            <h3>INITIATE LINK</h3>
+            <p class="contact-sub">Transmit communication vector directly or submit terminal frequency.</p>
+            <div class="contact-details">
+                <div>📧 <strong>Email:</strong> <a href="mailto:singireddysushmithareddy104@gmail.com">singireddysushmithareddy104@gmail.com</a></div>
+                <div>💼 <strong>LinkedIn:</strong> <a href="https://linkedin.com/in/sushmitha-singireddy-7b5559352" target="_blank">linkedin.com/in/sushmitha-singireddy-7b5559352</a></div>
+                <div>🐙 <strong>GitHub:</strong> <a href="https://github.com/Singireddy-Sushmitha5" target="_blank">github.com/Singireddy-Sushmitha5</a></div>
+            </div>
+            <form class="contact-form" onsubmit="event.preventDefault(); alert('Transmission Received!');">
+                <div class="form-group">
+                    <input type="text" placeholder="IDENTIFIER" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" placeholder="COMMUNICATION NODE (EMAIL)" required>
+                </div>
+                <div class="form-group">
+                    <textarea placeholder="MESSAGE METADATA" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn send-btn">TRANSMIT</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== SCROLL INDICATOR ===== -->
+    <div class="scroll-indicator">↓ ROTATING RESUME ARCHIVE ↓</div>
+
+    <!-- ===== CUSTOM CURSOR ===== -->
+    <div id="custom-cursor"><span id="cursor-text">VIEW</span></div>
+    <div id="cursor-dot"></div>
+
+    <!-- ===== MODERN DETAILS MODAL ===== -->
+    <div id="project-modal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            <div class="modal-header">
+                <span class="modal-project-id" id="modal-project-num">PROJECT 01</span>
+                <h2 id="modal-project-title">NEURAL NET</h2>
+            </div>
+            <div class="modal-body">
+                <div class="modal-info">
+                    <p class="modal-desc" id="modal-project-desc">AI-driven predictive modeling and neural synthesis for planetary network navigation.</p>
+                    <div class="modal-section-title">SYSTEM SPECIFICATIONS</div>
+                    <div class="tech-grid" id="modal-project-tech">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">PyTorch</span>
+                    </div>
+                </div>
+                <div class="modal-visual">
+                    <div class="visual-tabs" id="modal-visual-tabs" style="display: none;">
+                        <button class="visual-tab active" id="tab-telemetry">TELEMETRY</button>
+                        <button class="visual-tab" id="tab-document">DOCUMENT</button>
+                    </div>
+                    <canvas id="modal-visual-canvas"></canvas>
+                    <img id="modal-visual-img" src="" alt="Verified Certificate" />
+                </div>
+            </div>
+            <div class="modal-actions">
+                <a href="#" class="btn modal-btn" id="modal-project-link" target="_blank">LAUNCH ACCESS VECTOR</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== THREE.JS ===== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- ===== MAIN SCRIPT ===== -->
+    <script>
+        // ============================================================
+        // 1. DATA DEFINITIONS
+        // ============================================================
+        const projects = [
+            { id: 1, number: '01', title: 'VOTE HUB', desc: 'Campus Vote Hub — An online voting system featuring user credentials verification, digital secure ballots, and database syncing to ensure reliable elections.', tech: ['Python', 'HTML5', 'CSS3', 'JavaScript', 'MongoDB'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#00f0ff', type: 'network' },
+            { id: 2, number: '02', title: 'SERVICENOW', desc: 'Virtual Internship (ServiceNow University / SmartBridge). Handled ServiceNow Administration, Flow Designs, Telemetry Reports, Automated Test Framework (ATF), and CSA configurations.', tech: ['ServiceNow', 'Flow Designer', 'ATF', 'Reports', 'CSA'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#7b2ffc', type: 'radar', certImage: 'certificates/cert-servicenow.jpg' },
+            { id: 3, number: '03', title: 'AI SYSTEM', desc: 'AI Tools & ChatGPT Workshop training (Be10X). Designed custom prompting systems, automated work flows, and investigated generative AI configurations.', tech: ['Generative AI', 'Agentic AI', 'ChatGPT', 'Prompt Engineering'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ff6fd8', type: 'quantum', certImage: 'certificates/cert-be10x.jpg' },
+            { id: 4, number: '04', title: 'WEB DEV', desc: 'Web Development Certification from Brainovision. Built responsive user interfaces and designed core templates with cross-browser compatibility.', tech: ['HTML5', 'CSS3', 'JavaScript', 'Git', 'Brainovision'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#00ff88', type: 'network' },
+            { id: 5, number: '05', title: 'ALGORITHMS', desc: 'B.Tech Core Programming Modules. Developed Object-Oriented software architectures, search/sort optimization, and structured database models.', tech: ['Java', 'Python', 'C', 'OOP', 'Data Structures'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ffaa00', type: 'cube' },
+            { id: 6, number: '06', title: 'DATABASES', desc: 'Database Management Systems and MongoDB configurations. Built schema structures, transactions logic, and optimized queries for web integrations.', tech: ['MongoDB', 'DBMS', 'SQL Queries', 'Data Normalization'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ff4444', type: 'solaris' },
+            { id: 7, number: '07', title: 'ZERO TRUST', desc: 'Zero Trust Cloud Security Virtual Internship (Zscaler & EduSkills). Focused on Zscaler Internet Access, Private Access, and securing corporate network perimeters in a Zero-Trust topology.', tech: ['Zero Trust', 'Cloud Security', 'Zscaler Private Access', 'Zscaler Internet Access', 'EduSkills'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#00ffcc', type: 'shield', certImage: 'certificates/cert-zerotrust.jpg' },
+            { id: 8, number: '08', title: 'ANDROID DEV', desc: 'Android Developer Virtual Internship (Google for Developers & EduSkills). Implemented native Android UI designs using Jetpack Compose, Kotlin programming, and Android architecture modules.', tech: ['Android Development', 'Kotlin', 'Jetpack Compose', 'Google Developers', 'Mobile UX'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#3ddc84', type: 'mobile', certImage: 'certificates/cert-android.jpg' },
+            { id: 9, number: '09', title: 'JAVA STACK', desc: 'Java Full Stack Developer Virtual Internship (EduSkills Academy & AICTE). Designed end-to-end full stack web modules incorporating database configurations, backend REST APIs, and responsive UI wrappers.', tech: ['Java Programming', 'Spring Boot', 'MySQL', 'Full Stack Dev', 'AICTE'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#f89820', type: 'stack', certImage: 'certificates/cert-java.jpg' },
+            { id: 10, number: '10', title: 'DSA DEEPTECH', desc: 'International Level Bootcamp on DSA for DeepTech (Brainovision Solutions & AICTE). Formulated optimal complexity structures for advanced search, sorting, binary trees, dynamic programming, and logic algorithms.', tech: ['Data Structures', 'Algorithms', 'C++', 'Java Programming', 'Logic Design'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#a13bfd', type: 'tree', certImage: 'certificates/cert-dsa.jpg' },
+            { id: 11, number: '11', title: 'DATA ANALYTICS', desc: 'GenAI Powered Data Analytics Job Simulation (Tata & Forage). Conducted exploratory data analytics (EDA), predicted delinquency risks with AI, drafted executive business reports, and designed collections strategies.', tech: ['Generative AI', 'Data Analytics', 'Python Scripting', 'Predictive AI', 'Data Storytelling'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ff5ea7', type: 'analytics', certImage: 'certificates/cert-genai.jpg' },
+            { id: 12, number: '12', title: 'GEN AI NASSCOM', desc: 'Gen AI Assessment Certification by FutureSkills Prime and NASSCOM. Evaluated competency in GenAI concepts, prompt building, LLM architectures, and industrial applications.', tech: ['Generative AI', 'NASSCOM', 'FutureSkills Prime', 'Assessment', 'AI Competency'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#00a2e8', type: 'matrix', certImage: 'certificates/cert-genai-nasscom.jpg' },
+            { id: 13, number: '13', title: 'CYBERSECURITY', desc: 'Cybersecurity Virtual Internship (Palo Alto Networks & EduSkills). Covered firewall administration, security policy setups, endpoint threat prevention, and network traffic analysis.', tech: ['Cybersecurity', 'Palo Alto Networks', 'Firewalls', 'Threat Prevention', 'EduSkills'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ff3b3b', type: 'cyber', certImage: 'certificates/cert-cybersecurity.jpg' },
+            { id: 14, number: '14', title: 'AI-ML DEV', desc: 'AI-ML Virtual Internship (Google for Developers & EduSkills). Implemented Machine Learning models, data preparation, tensor calculations, and predictive neural network structures.', tech: ['Machine Learning', 'AI-ML', 'Google Developers', 'Model Training', 'Predictive Modeling'], link: 'https://github.com/Singireddy-Sushmitha5', color: '#ffb700', type: 'neural', certImage: 'certificates/cert-aiml.jpg' }
+        ];
+
+        const gravityModes = {
+            ZERO: { multiplier: 1.0, orbitSpeed: 0.3, floatAmp: 0.2, driftSpeed: 0.005, name: 'ZERO GRAVITY', readout: '0.00 G', color: '#00f0ff' },
+            MICRO: { multiplier: 0.3, orbitSpeed: 0.08, floatAmp: 0.05, driftSpeed: 0.001, name: 'MICRO-GRAVITY', readout: '0.12 G', color: '#7b2ffc' },
+            HYPER: { multiplier: 3.5, orbitSpeed: 1.2, floatAmp: 0.02, driftSpeed: 0.03, name: 'HYPER-GRAVITY', readout: '9.81 G', color: '#ff4444' },
+            BURST: { multiplier: 5.0, orbitSpeed: 0.5, floatAmp: 0.8, driftSpeed: 0.15, name: 'ANTI-GRAVITY CORE EXPLOSION', readout: '-1.50 G', color: '#ff6fd8' }
+        };
+
+        const cameraStates = {
+            HOME: { pos: new THREE.Vector3(0, 0, 10), lookAt: new THREE.Vector3(0, 0, 0) },
+            WORK: { pos: new THREE.Vector3(0, 3.8, 8.5), lookAt: new THREE.Vector3(0, 0, 0) },
+            ABOUT: { pos: new THREE.Vector3(-6, 2, 7.5), lookAt: new THREE.Vector3(2.5, 0, -2) },
+            CONTACT: { pos: new THREE.Vector3(5, -4.5, 8), lookAt: new THREE.Vector3(-2.2, 2.2, 0) },
+            DETAIL: { pos: new THREE.Vector3(0, 0, 5), lookAt: new THREE.Vector3(0, 0, 0) } // Dynamic
+        };
+
+        // ============================================================
+        // 2. SCENE SETUP
+        // ============================================================
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x060613);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        // Setup initial camera positions
+        const currentCameraPos = cameraStates.HOME.pos.clone();
+        const currentCameraLookAt = cameraStates.HOME.lookAt.clone();
+        camera.position.copy(currentCameraPos);
+        camera.lookAt(currentCameraLookAt);
+
+        let activeCameraState = 'HOME';
+        const targetCameraPos = cameraStates.HOME.pos.clone();
+        const targetCameraLookAt = cameraStates.HOME.lookAt.clone();
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.25;
+        container.appendChild(renderer.domElement);
+
+        // ============================================================
+        // 3. LIGHTS
+        // ============================================================
+        const ambientLight = new THREE.AmbientLight(0x181830, 0.6);
+        scene.add(ambientLight);
+
+        const mainLight = new THREE.DirectionalLight(0x00f0ff, 1.8);
+        mainLight.position.set(6, 12, 8);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 1024;
+        mainLight.shadow.mapSize.height = 1024;
+        scene.add(mainLight);
+
+        const rimLight = new THREE.DirectionalLight(0x7b2ffc, 1.2);
+        rimLight.position.set(-6, -6, 6);
+        scene.add(rimLight);
+
+        const fillLight = new THREE.PointLight(0xff6fd8, 0.8, 25);
+        fillLight.position.set(0, 0, 4);
+        scene.add(fillLight);
+
+        // ============================================================
+        // 4. TEXTURE GENERATOR
+        // ============================================================
+        function createCardTexture(project) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 340;
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = '#0a0a20';
+            ctx.fillRect(0, 0, 512, 340);
+
+            // Tech Matrix Grid
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 512; i += 32) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, 340);
+                ctx.stroke();
+            }
+            for (let i = 0; i < 340; i += 32) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(512, i);
+                ctx.stroke();
+            }
+
+            // Neon Borders
+            ctx.strokeStyle = project.color;
+            ctx.lineWidth = 6;
+            ctx.strokeRect(3, 3, 506, 334);
+
+            // Subtle inner line
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(12, 12, 488, 316);
+
+            // Corner highlights
+            ctx.fillStyle = project.color;
+            const len = 24;
+            const thk = 6;
+            ctx.fillRect(0, 0, len, thk);
+            ctx.fillRect(0, 0, thk, len);
+            ctx.fillRect(512 - len, 0, len, thk);
+            ctx.fillRect(512 - thk, 0, thk, len);
+            ctx.fillRect(0, 340 - thk, len, thk);
+            ctx.fillRect(0, 340 - len, thk, len);
+            ctx.fillRect(512 - len, 340 - thk, len, thk);
+            ctx.fillRect(512 - thk, 340 - len, thk, len);
+
+            // Tag indicator
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.08)';
+            ctx.fillRect(28, 28, 130, 24);
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(28, 28, 130, 24);
+
+            ctx.fillStyle = project.color;
+            ctx.font = 'bold 9px "Orbitron", monospace';
+            ctx.fillText('ACTIVE CREDENTIAL', 32, 44);
+
+            // Card ID number
+            ctx.fillStyle = project.color;
+            ctx.font = '900 48px "Orbitron", sans-serif';
+            ctx.fillText(project.number, 415, 75);
+
+            // Title text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 32px "Orbitron", sans-serif';
+            ctx.fillText(project.title, 28, 180);
+
+            // Action prompt
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.font = '600 13px "Inter", sans-serif';
+            ctx.fillText('PULL DATA CORE ✦ CLICK MESH', 28, 215);
+
+            // Barcode graphic
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+            for (let i = 0; i < 20; i++) {
+                const w = Math.random() * 4 + 1;
+                const gap = Math.random() * 8 + 2;
+                ctx.fillRect(28 + (i * 8), 250, w, 20);
+            }
+
+            // High-tech waveform lines
+            ctx.strokeStyle = project.color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 240; x < 480; x += 10) {
+                const y = 260 + Math.sin(x * 0.08 + project.id) * 12;
+                if (x === 240) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.minFilter = THREE.LinearFilter;
+            return tex;
+        }
+
+        // ============================================================
+        // 5. 3D ENTITY BUILDERS
+        // ============================================================
+        const objects = [];
+        const projectCards = [];
+        const shapes = [];
+
+        // --- 5A. HERO SPHERE ---
+        const heroGeo = new THREE.IcosahedronGeometry(1.2, 1);
+        const heroMat = new THREE.MeshStandardMaterial({
+            color: 0x00f0ff,
+            emissive: 0x00f0ff,
+            emissiveIntensity: 0.25,
+            metalness: 0.95,
+            roughness: 0.05
+        });
+        const hero = new THREE.Mesh(heroGeo, heroMat);
+        hero.castShadow = true;
+        hero.userData = { phase: 0, floatSpeed: 0.6, floatAmp: 0.18, rotSpeed: 0.006, pulseSpeed: 0.6 };
+        scene.add(hero);
+        objects.push(hero);
+
+        // Core wireframe shell
+        const wireGeo = new THREE.IcosahedronGeometry(1.5, 1);
+        const wireMat = new THREE.MeshBasicMaterial({
+            color: 0x7b2ffc,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.35
+        });
+        const wireShell = new THREE.Mesh(wireGeo, wireMat);
+        scene.add(wireShell);
+        objects.push(wireShell);
+
+        // --- 5B. ORBITING CARDS ---
+        const cardGeo = new THREE.BoxGeometry(1.8, 1.2, 0.05);
+
+        projects.forEach((proj, i) => {
+            const group = new THREE.Group();
+
+            const frontTex = createCardTexture(proj);
+            const sideMat = new THREE.MeshStandardMaterial({ color: 0x050510, metalness: 0.9, roughness: 0.1 });
+            const frontMat = new THREE.MeshStandardMaterial({
+                map: frontTex,
+                emissive: proj.color,
+                emissiveIntensity: 0.15,
+                metalness: 0.2,
+                roughness: 0.8
+            });
+
+            // Map materials to indices: [R, L, T, B, Front, Back]
+            const mats = [sideMat, sideMat, sideMat, sideMat, frontMat, sideMat];
+            
+            const card = new THREE.Mesh(cardGeo, mats);
+            card.castShadow = true;
+            group.add(card);
+
+            // Glowing border outline
+            const borderGeo = new THREE.EdgesGeometry(cardGeo);
+            const borderMat = new THREE.LineBasicMaterial({ color: proj.color, transparent: true, opacity: 0.35 });
+            const border = new THREE.LineSegments(borderGeo, borderMat);
+            group.add(border);
+
+            // Orbit angles and layout
+            const angle = (i / projects.length) * Math.PI * 2;
+            const radius = 5.2;
+            group.position.set(Math.cos(angle) * radius, (Math.random() - 0.5) * 0.4, Math.sin(angle) * radius);
+
+            group.userData = {
+                project: proj,
+                orbitAngle: angle,
+                orbitRadius: radius,
+                orbitSpeed: 0.22 + Math.random() * 0.1,
+                floatSpeed: 0.7 + Math.random() * 0.6,
+                floatAmp: 0.18 + Math.random() * 0.1,
+                phase: Math.random() * Math.PI * 2,
+                hoverScale: 1,
+                targetScale: 1,
+                isHovered: false
+            };
+
+            group.lookAt(0, group.position.y * 0.5, 0);
+            scene.add(group);
+            projectCards.push(group);
+            objects.push(group);
+        });
+
+        // --- 5C. FLOATING DEBRIS ---
+        const shapesTypes = [
+            new THREE.TorusGeometry(0.25, 0.08, 8, 16),
+            new THREE.OctahedronGeometry(0.24),
+            new THREE.TetrahedronGeometry(0.28),
+            new THREE.BoxGeometry(0.28, 0.28, 0.28),
+            new THREE.DodecahedronGeometry(0.22),
+        ];
+
+        for (let i = 0; i < 35; i++) {
+            const geo = shapesTypes[Math.floor(Math.random() * shapesTypes.length)];
+            const colorHue = 0.5 + Math.random() * 0.35; // Cyan to Magenta range
+            const matColor = new THREE.Color().setHSL(colorHue, 0.85, 0.5);
+
+            const mat = new THREE.MeshStandardMaterial({
+                color: matColor,
+                emissive: matColor,
+                emissiveIntensity: 0.18,
+                metalness: 0.8,
+                roughness: 0.2,
+                transparent: true,
+                opacity: 0.7
+            });
+            const mesh = new THREE.Mesh(geo, mat);
+
+            const radius = 5.2 + Math.random() * 4.5;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+
+            mesh.position.set(
+                radius * Math.sin(phi) * Math.cos(theta),
+                (Math.random() - 0.5) * 8,
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
+
+            mesh.userData = {
+                floatSpeed: 0.4 + Math.random() * 0.5,
+                floatAmp: 0.2 + Math.random() * 0.25,
+                phase: Math.random() * Math.PI * 2,
+                rotSpeed: new THREE.Vector3((Math.random() - 0.5) * 0.015, (Math.random() - 0.5) * 0.015, (Math.random() - 0.5) * 0.015),
+                driftSpeed: new THREE.Vector3(0, 0, 0),
+                initialPos: mesh.position.clone()
+            };
+
+            scene.add(mesh);
+            shapes.push(mesh);
+            objects.push(mesh);
+        }
+
+        // --- 5D. SPACE DUST PARTICLES ---
+        const particleCount = 2200;
+        const particleGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(particleCount * 3);
+        const colors = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount; i++) {
+            const r = 10 + Math.random() * 15;
+            const theta = Math.random() * Math.PI * 2;
+            const phi = Math.acos(2 * Math.random() - 1);
+
+            positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+            positions[i * 3 + 1] = (Math.random() - 0.5) * 16;
+            positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+
+            const dustColor = new THREE.Color().setHSL(0.55 + Math.random() * 0.2, 0.9, 0.6);
+            colors[i * 3] = dustColor.r;
+            colors[i * 3 + 1] = dustColor.g;
+            colors[i * 3 + 2] = dustColor.b;
+        }
+
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        particleGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        const particleMat = new THREE.PointsMaterial({
+            size: 0.065,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.75,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            sizeAttenuation: true
+        });
+
+        const particleSystem = new THREE.Points(particleGeo, particleMat);
+        scene.add(particleSystem);
+
+        // ============================================================
+        // 6. PHYSICS & INTERACTIVE CONTROLS
+        // ============================================================
+        const mouse = { rawX: window.innerWidth / 2, rawY: window.innerHeight / 2 };
+        const mouse3D = new THREE.Vector2(-10, -10); // Start offscreen
+        const raycaster = new THREE.Raycaster();
+        
+        let targetGravity = 1.0;
+        let currentGravity = 1.0;
+
+        // Custom lerped cursor positions
+        const cursorPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        const customCursor = document.getElementById('custom-cursor');
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorText = document.getElementById('cursor-text');
+
+        document.addEventListener('mousemove', (e) => {
+            mouse.rawX = e.clientX;
+            mouse.rawY = e.clientY;
+
+            // Convert to 3D normalized coordinates
+            mouse3D.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse3D.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        // Trigger gravity core bursts
+        function triggerBurst() {
+            shapes.forEach(mesh => {
+                const dir = mesh.position.clone().normalize();
+                mesh.userData.driftSpeed.copy(dir.multiplyScalar(0.18 + Math.random() * 0.1));
+            });
+            
+            projectCards.forEach(card => {
+                const dir = card.position.clone().normalize();
+                card.userData.phase += Math.PI; // Perturb orbit phases
+            });
+        }
+
+        // Handle Gravity core UI changes
+        const hudReadout = document.getElementById('gravity-readout');
+        const hudModeName = document.getElementById('gravity-mode-name');
+        const hudButtons = document.querySelectorAll('.hud-btn');
+
+        hudButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                hudButtons.forEach(b => b.classList.remove('active'));
+                
+                const modeKey = btn.getAttribute('data-mode');
+                btn.classList.add('active');
+                
+                const modeData = gravityModes[modeKey];
+                targetGravity = modeData.multiplier;
+                hudReadout.innerText = modeData.readout;
+                hudReadout.style.color = modeData.color;
+                hudModeName.innerText = modeData.name;
+                hudModeName.style.color = modeData.color;
+
+                if (modeKey === 'BURST') {
+                    triggerBurst();
+                    // Reset back to zero-g after a short burst delay
+                    setTimeout(() => {
+                        const zeroBtn = document.querySelector('[data-mode="ZERO"]');
+                        if (zeroBtn && btn.classList.contains('active')) {
+                            zeroBtn.click();
+                        }
+                    }, 2500);
+                }
+            });
+        });
+
+        // ============================================================
+        // 7. CAMERA NAVIGATION SYSTEM
+        // ============================================================
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.content-section');
+        const scrollIndicator = document.querySelector('.scroll-indicator');
+
+        function switchSection(sectionKey) {
+            activeCameraState = sectionKey;
+            
+            // Set Camera State targets
+            const state = cameraStates[sectionKey];
+            if (state) {
+                targetCameraPos.copy(state.pos);
+                targetCameraLookAt.copy(state.lookAt);
+            }
+
+            // UI Overlays visibility
+            sections.forEach(sec => {
+                sec.classList.remove('active');
+                if (sec.id === `section-${sectionKey.toLowerCase()}`) {
+                    sec.classList.add('active');
+                }
+            });
+
+            // Adjust nav tags
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-section') === sectionKey) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Scroll helper text adjustments
+            if (sectionKey === 'HOME') {
+                scrollIndicator.innerText = '↓ ROTATING RESUME ARCHIVE ↓';
+            } else if (sectionKey === 'WORK') {
+                scrollIndicator.innerText = '✦ SELECT SYSTEM CORE ✦';
+            } else {
+                scrollIndicator.innerText = 'ZERO GRAVITY CORE';
+            }
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.getAttribute('data-section');
+                switchSection(section);
+            });
+        });
+
+        document.getElementById('explore-work-btn').addEventListener('click', () => {
+            switchSection('WORK');
+        });
+
+        // ============================================================
+        // 8. DETAIL MODAL & TELEMETRY SCREENS
+        // ============================================================
+        const modal = document.getElementById('project-modal');
+        const modalClose = document.getElementById('modal-close-btn');
+        const modalNum = document.getElementById('modal-project-num');
+        const modalTitle = document.getElementById('modal-project-title');
+        const modalDesc = document.getElementById('modal-project-desc');
+        const modalTech = document.getElementById('modal-project-tech');
+        const modalLink = document.getElementById('modal-project-link');
+        const modalCanvas = document.getElementById('modal-visual-canvas');
+        const mctx = modalCanvas.getContext('2d');
+
+        let selectedProject = null;
+        let isModalActive = false;
+
+        const modalVisualTabs = document.getElementById('modal-visual-tabs');
+        const tabTelemetry = document.getElementById('tab-telemetry');
+        const tabDocument = document.getElementById('tab-document');
+        const modalCanvasEl = document.getElementById('modal-visual-canvas');
+        const modalImgEl = document.getElementById('modal-visual-img');
+
+        // Set up tab click listeners
+        tabTelemetry.addEventListener('click', () => {
+            tabTelemetry.classList.add('active');
+            tabDocument.classList.remove('active');
+            modalCanvasEl.style.display = 'block';
+            modalImgEl.style.display = 'none';
+        });
+
+        tabDocument.addEventListener('click', () => {
+            tabDocument.classList.add('active');
+            tabTelemetry.classList.remove('active');
+            modalCanvasEl.style.display = 'none';
+            modalImgEl.style.display = 'block';
+        });
+
+        function showProjectDetails(proj) {
+            selectedProject = proj;
+            isModalActive = true;
+            
+            // Set modal values
+            modalNum.innerText = `MODULE ${proj.number}`;
+            modalNum.style.color = proj.color;
+            modalTitle.innerText = proj.title;
+            modalDesc.innerText = proj.desc;
+            modalLink.href = proj.link;
+            modalLink.style.borderColor = proj.color;
+            modalLink.style.boxShadow = `0 0 15px ${proj.color}22`;
+            
+            // Clear and inject tech badges
+            modalTech.innerHTML = '';
+            proj.tech.forEach(t => {
+                const badge = document.createElement('span');
+                badge.className = 'tech-tag';
+                badge.style.color = proj.color;
+                badge.style.borderColor = `${proj.color}44`;
+                badge.style.background = `${proj.color}08`;
+                badge.innerText = t;
+                modalTech.appendChild(badge);
+            });
+
+            // Adjust modal details borders
+            document.querySelector('.modal-card').style.borderColor = proj.color;
+
+            // Handle Tab buttons display for certificates
+            if (proj.certImage) {
+                modalVisualTabs.style.display = 'flex';
+                // Update tab colors based on current certificate theme
+                const cssActive = `
+                    #tab-telemetry.active { background: ${proj.color} !important; border-color: ${proj.color} !important; color: #060613 !important; box-shadow: 0 0 10px ${proj.color}88 !important; }
+                    #tab-document.active { background: ${proj.color} !important; border-color: ${proj.color} !important; color: #060613 !important; box-shadow: 0 0 10px ${proj.color}88 !important; }
+                    .visual-tabs { border-color: ${proj.color}44 !important; }
+                `;
+                let styleNode = document.getElementById('dynamic-tab-styles');
+                if (!styleNode) {
+                    styleNode = document.createElement('style');
+                    styleNode.id = 'dynamic-tab-styles';
+                    document.head.appendChild(styleNode);
+                }
+                styleNode.innerHTML = cssActive;
+
+                // Load image path
+                modalImgEl.src = proj.certImage;
+                // Default back to telemetry tab
+                tabTelemetry.click();
+            } else {
+                modalVisualTabs.style.display = 'none';
+                modalCanvasEl.style.display = 'block';
+                modalImgEl.style.display = 'none';
+            }
+
+            // Trigger canvas resize
+            resizeModalCanvas();
+
+            // Set camera coordinates for close-up inspection
+            activeCameraState = 'DETAIL';
+            
+            // Move camera close to the specific card's orbit
+            const cardObj = projectCards.find(c => c.userData.project.id === proj.id);
+            if (cardObj) {
+                // Pos camera perpendicular to the front of the card
+                const dir = cardObj.position.clone().normalize();
+                targetCameraPos.copy(cardObj.position).add(dir.multiplyScalar(2.2));
+                targetCameraPos.y += 0.2; // Shift up slightly
+                targetCameraLookAt.copy(cardObj.position);
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            isModalActive = false;
+            selectedProject = null;
+            modal.classList.remove('active');
+            
+            // Reset image source
+            modalImgEl.src = '';
+            
+            switchSection('WORK');
+        }
+
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Resize the modal visualization screen canvas
+        function resizeModalCanvas() {
+            const rect = modalCanvas.parentElement.getBoundingClientRect();
+            modalCanvas.width = rect.width * window.devicePixelRatio;
+            modalCanvas.height = rect.height * window.devicePixelRatio;
+            mctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+
+        window.addEventListener('resize', () => {
+            if (isModalActive) resizeModalCanvas();
+        });
+
+        // --- DRAW INTERACTIVE GRAPHICS INSIDE MODAL CANVASES ---
+        function drawModalVisualization(time) {
+            if (!selectedProject) return;
+
+            const w = modalCanvas.width / window.devicePixelRatio;
+            const h = modalCanvas.height / window.devicePixelRatio;
+            const color = selectedProject.color;
+
+            mctx.fillStyle = '#020208';
+            mctx.fillRect(0, 0, w, h);
+
+            // Base tech lines
+            mctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            mctx.lineWidth = 1;
+            mctx.beginPath();
+            mctx.arc(w/2, h/2, Math.min(w,h)*0.4, 0, Math.PI*2);
+            mctx.stroke();
+
+            // Custom visuals based on project type
+            if (selectedProject.type === 'network') {
+                // Glowing connected neural nodes
+                const nodes = [];
+                const num = 12;
+                mctx.fillStyle = color;
+                
+                for (let i = 0; i < num; i++) {
+                    const x = w/2 + Math.cos(time * 0.5 + i * (Math.PI*2 / num)) * (w * 0.3 * (0.6 + Math.sin(time + i)*0.1));
+                    const y = h/2 + Math.sin(time * 0.4 + i * (Math.PI*2 / num)) * (h * 0.3 * (0.6 + Math.cos(time - i)*0.1));
+                    nodes.push({x, y});
+                }
+
+                // Draw links
+                mctx.lineWidth = 0.8;
+                for (let i = 0; i < num; i++) {
+                    for (let j = i+1; j < num; j++) {
+                        const dist = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+                        if (dist < 180) {
+                            mctx.strokeStyle = `${color}${Math.floor((1 - dist/180) * 80).toString(16).padStart(2,'0')}`;
+                            mctx.beginPath();
+                            mctx.moveTo(nodes[i].x, nodes[i].y);
+                            mctx.lineTo(nodes[j].x, nodes[j].y);
+                            mctx.stroke();
+                        }
+                    }
+                }
+
+                // Draw nodes
+                nodes.forEach(n => {
+                    mctx.beginPath();
+                    mctx.arc(n.x, n.y, 4, 0, Math.PI*2);
+                    mctx.shadowColor = color;
+                    mctx.shadowBlur = 8;
+                    mctx.fill();
+                    mctx.shadowBlur = 0;
+                });
+
+            } else if (selectedProject.type === 'cube') {
+                // Spin a 3D wireframe hypercube on 2D
+                const vertices = [];
+                const size = Math.min(w, h) * 0.25;
+                const rotX = time * 0.4;
+                const rotY = time * 0.6;
+
+                // Cube coords
+                const localVerts = [
+                    [-1,-1,-1], [1,-1,-1], [1,1,-1], [-1,1,-1],
+                    [-1,-1,1],  [1,-1,1],  [1,1,1],  [-1,1,1]
+                ];
+
+                localVerts.forEach(v => {
+                    let x = v[0] * size;
+                    let y = v[1] * size;
+                    let z = v[2] * size;
+
+                    // Rot X
+                    let dy1 = y * Math.cos(rotX) - z * Math.sin(rotX);
+                    let dz1 = y * Math.sin(rotX) + z * Math.cos(rotX);
+                    // Rot Y
+                    let dx2 = x * Math.cos(rotY) - dz1 * Math.sin(rotY);
+                    let dz2 = x * Math.sin(rotY) + dz1 * Math.cos(rotY);
+
+                    // Perspective projection
+                    const scale = 300 / (300 + dz2);
+                    vertices.push({ x: w/2 + dx2 * scale, y: h/2 + dy1 * scale });
+                });
+
+                const edges = [
+                    [0,1], [1,2], [2,3], [3,0],
+                    [4,5], [5,6], [6,7], [7,4],
+                    [0,4], [1,5], [2,6], [3,7]
+                ];
+
+                mctx.strokeStyle = color;
+                mctx.lineWidth = 1.5;
+                edges.forEach(e => {
+                    mctx.beginPath();
+                    mctx.moveTo(vertices[e[0]].x, vertices[e[0]].y);
+                    mctx.lineTo(vertices[e[1]].x, vertices[e[1]].y);
+                    mctx.shadowColor = color;
+                    mctx.shadowBlur = 10;
+                    mctx.stroke();
+                    mctx.shadowBlur = 0;
+                });
+
+            } else if (selectedProject.type === 'ecg') {
+                // Pulse waves telemetry ECG monitor
+                mctx.strokeStyle = color;
+                mctx.lineWidth = 2.5;
+                mctx.shadowColor = color;
+                mctx.shadowBlur = 8;
+                mctx.beginPath();
+                
+                for (let x = 0; x < w; x++) {
+                    const progress = (x + time * 180) % w;
+                    let pulse = 0;
+                    
+                    // Generate heartbeat spikes
+                    const tMod = (progress) % 150;
+                    if (tMod > 40 && tMod < 50) {
+                        pulse = -Math.sin((tMod - 40) * Math.PI / 10) * 45;
+                    } else if (tMod >= 50 && tMod < 60) {
+                        pulse = Math.sin((tMod - 50) * Math.PI / 10) * 75;
+                    } else if (tMod >= 60 && tMod < 70) {
+                        pulse = -Math.sin((tMod - 60) * Math.PI / 10) * 20;
+                    }
+
+                    const y = h/2 + pulse + Math.sin(progress * 0.05) * 5;
+                    if (x === 0) mctx.moveTo(progress, y);
+                    else mctx.lineTo(progress, y);
+                }
+                mctx.stroke();
+                mctx.shadowBlur = 0;
+
+                // Telemetry textual overlay
+                mctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                mctx.font = '9px "Orbitron", monospace';
+                mctx.fillText(`SYSTEM STABILITY: ${Math.floor(98 + Math.sin(time)*1.5)}%`, 20, 30);
+                mctx.fillText('DATABASE INTEGRITY: ONLINE', 20, 45);
+
+            } else if (selectedProject.type === 'radar') {
+                // Scanning radar lines
+                const radius = Math.min(w, h) * 0.4;
+                const angle = (time * 1.5) % (Math.PI * 2);
+
+                mctx.strokeStyle = 'rgba(123, 47, 252, 0.15)';
+                mctx.lineWidth = 1;
+                // Radar circles
+                mctx.beginPath(); mctx.arc(w/2, h/2, radius*0.3, 0, Math.PI*2); mctx.stroke();
+                mctx.beginPath(); mctx.arc(w/2, h/2, radius*0.6, 0, Math.PI*2); mctx.stroke();
+                mctx.beginPath(); mctx.arc(w/2, h/2, radius, 0, Math.PI*2); mctx.stroke();
+
+                // Blip coordinates
+                const blips = [
+                    {r: radius * 0.5, a: 1.2, size: 4},
+                    {r: radius * 0.8, a: 4.5, size: 6},
+                    {r: radius * 0.2, a: 2.8, size: 3}
+                ];
+
+                blips.forEach(b => {
+                    const bx = w/2 + Math.cos(b.a) * b.r;
+                    const by = h/2 + Math.sin(b.a) * b.r;
+
+                    // Calculate delay from scanline angle
+                    const diff = Math.abs(angle - b.a);
+                    const opacity = Math.max(0, 1 - diff * 0.8);
+                    
+                    if (opacity > 0) {
+                        mctx.fillStyle = `rgba(123, 47, 252, ${opacity})`;
+                        mctx.beginPath();
+                        mctx.arc(bx, by, b.size, 0, Math.PI*2);
+                        mctx.fill();
+                    }
+                });
+
+                // Scan sweeps line
+                mctx.strokeStyle = color;
+                mctx.lineWidth = 1.5;
+                mctx.beginPath();
+                mctx.moveTo(w/2, h/2);
+                mctx.lineTo(w/2 + Math.cos(angle)*radius, h/2 + Math.sin(angle)*radius);
+                mctx.stroke();
+
+            } else if (selectedProject.type === 'quantum') {
+                // Waving vertical bars grid
+                const barCount = 20;
+                const spacing = w / (barCount + 1);
+                mctx.lineWidth = 6;
+                
+                for (let i = 0; i < barCount; i++) {
+                    const x = spacing * (i + 1);
+                    const amp = Math.sin(time * 2 + i * 0.5) * 55 + 65;
+                    
+                    const grad = mctx.createLinearGradient(x, h/2 - amp, x, h/2 + amp);
+                    grad.addColorStop(0, color);
+                    grad.addColorStop(0.5, 'rgba(255,111,216,0.1)');
+                    grad.addColorStop(1, color);
+
+                    mctx.strokeStyle = grad;
+                    mctx.beginPath();
+                    mctx.moveTo(x, h/2 - amp);
+                    mctx.lineTo(x, h/2 + amp);
+                    mctx.stroke();
+                }
+
+            } else if (selectedProject.type === 'solaris') {
+                // Central planet and orbits
+                mctx.fillStyle = '#ff4444';
+                mctx.shadowColor = '#ff4444';
+                mctx.shadowBlur = 15;
+                mctx.beginPath();
+                mctx.arc(w/2, h/2, 14, 0, Math.PI*2);
+                mctx.fill();
+                mctx.shadowBlur = 0;
+
+                // Orbiting planetary moons
+                const moons = [
+                    { radius: 60, speed: 1.8, color: '#ff8888', size: 4 },
+                    { radius: 100, speed: 0.9, color: '#ffaaaa', size: 6 },
+                    { radius: 140, speed: 0.5, color: '#ff3333', size: 5 }
+                ];
+
+                moons.forEach(m => {
+                    const angle = time * m.speed;
+                    const mx = w/2 + Math.cos(angle) * m.radius;
+                    const my = h/2 + Math.sin(angle) * m.radius;
+
+                    mctx.strokeStyle = 'rgba(255, 68, 68, 0.15)';
+                    mctx.lineWidth = 1;
+                    mctx.beginPath();
+                    mctx.arc(w/2, h/2, m.radius, 0, Math.PI*2);
+                    mctx.stroke();
+
+                    mctx.fillStyle = m.color;
+                    mctx.beginPath();
+                    mctx.arc(mx, my, m.size, 0, Math.PI*2);
+                    mctx.fill();
+                });
+            } else if (selectedProject.type === 'shield') {
+                // Concentric rotating defense shields and signal pulses
+                const center = { x: w / 2, y: h / 2 };
+                const baseRad = Math.min(w, h) * 0.35;
+
+                mctx.fillStyle = color;
+                mctx.shadowColor = color;
+                mctx.shadowBlur = 10 + Math.sin(time * 5) * 4;
+                mctx.beginPath();
+                mctx.arc(center.x, center.y, 10, 0, Math.PI * 2);
+                mctx.fill();
+                mctx.shadowBlur = 0;
+
+                mctx.lineWidth = 2.5;
+                for (let j = 0; j < 3; j++) {
+                    const r = baseRad * (0.5 + j * 0.25);
+                    const speed = (j % 2 === 0 ? 1 : -1) * (0.4 + j * 0.2) * time;
+                    mctx.strokeStyle = `${color}${Math.floor(255 - j * 60).toString(16).padStart(2,'0')}`;
+                    mctx.beginPath();
+                    mctx.arc(center.x, center.y, r, speed, speed + Math.PI * 0.7);
+                    mctx.stroke();
+                    mctx.beginPath();
+                    mctx.arc(center.x, center.y, r, speed + Math.PI, speed + Math.PI * 1.7);
+                    mctx.stroke();
+                }
+
+                mctx.strokeStyle = `${color}22`;
+                mctx.lineWidth = 1;
+                mctx.beginPath();
+                for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+                    mctx.moveTo(center.x, center.y);
+                    mctx.lineTo(center.x + Math.cos(a + time * 0.1) * baseRad * 1.2, center.y + Math.sin(a + time * 0.1) * baseRad * 1.2);
+                }
+                mctx.stroke();
+
+            } else if (selectedProject.type === 'mobile') {
+                // Wireframe mobile device floating in perspective space
+                const center = { x: w / 2, y: h / 2 };
+                const pw = 90;
+                const ph = 160;
+                
+                mctx.strokeStyle = color;
+                mctx.lineWidth = 2;
+                mctx.shadowColor = color;
+                mctx.shadowBlur = 8;
+
+                mctx.beginPath();
+                mctx.roundRect(center.x - pw / 2, center.y - ph / 2, pw, ph, 8);
+                mctx.stroke();
+
+                mctx.lineWidth = 1;
+                mctx.beginPath();
+                mctx.moveTo(center.x - 15, center.y - ph / 2 + 8);
+                mctx.lineTo(center.x + 15, center.y - ph / 2 + 8);
+                mctx.stroke();
+
+                mctx.roundRect(center.x - 4, center.y + ph / 2 - 12, 8, 8, 2);
+                mctx.stroke();
+
+                mctx.fillStyle = `${color}22`;
+                const progress = (time * 40) % 70;
+                mctx.fillRect(center.x - pw / 2 + 8, center.y - ph / 2 + 20 + progress, pw - 16, 25);
+                mctx.fillRect(center.x - pw / 2 + 8, center.y - ph / 2 + 60 + progress, pw - 16, 25);
+                mctx.fillRect(center.x - pw / 2 + 8, center.y - ph / 2 - 20 + progress, pw - 16, 25);
+
+                mctx.shadowBlur = 0;
+
+            } else if (selectedProject.type === 'stack') {
+                // Layered stack representation (Database, Backend, Client)
+                const center = { x: w / 2, y: h / 2 };
+                const sw = 140;
+                const sh = 20;
+                const layers = ['CLIENT INTERFACE', 'API ENDPOINTS / SERVER', 'DATABASE ARCHIVE'];
+                
+                mctx.shadowBlur = 0;
+                for (let j = 0; j < 3; j++) {
+                    const y = center.y - 50 + j * 50;
+                    mctx.strokeStyle = color;
+                    mctx.lineWidth = 2;
+                    mctx.beginPath();
+                    mctx.moveTo(center.x - sw / 2, y);
+                    mctx.lineTo(center.x + sw / 2, y);
+                    mctx.lineTo(center.x + sw / 2 - 15, y + sh);
+                    mctx.lineTo(center.x - sw / 2 + 15, y + sh);
+                    mctx.closePath();
+                    mctx.stroke();
+
+                    mctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    mctx.font = 'bold 8px "Orbitron", sans-serif';
+                    mctx.textAlign = 'center';
+                    mctx.fillText(layers[j], center.x, y + 13);
+                }
+
+                const flowTime = (time * 1.5) % 3;
+                mctx.fillStyle = color;
+                mctx.beginPath();
+                mctx.arc(center.x - 20, center.y - 50 + flowTime * 50, 4, 0, Math.PI * 2);
+                mctx.arc(center.x + 20, center.y + 50 - flowTime * 50, 4, 0, Math.PI * 2);
+                mctx.fill();
+
+            } else if (selectedProject.type === 'tree') {
+                // Binary Tree structure with dynamic traversals
+                const nodes = [
+                    { x: w / 2, y: h / 2 - 60, id: 0 },
+                    { x: w / 2 - 50, y: h / 2 - 10, id: 1 },
+                    { x: w / 2 + 50, y: h / 2 - 10, id: 2 },
+                    { x: w / 2 - 80, y: h / 2 + 40, id: 3 },
+                    { x: w / 2 - 20, y: h / 2 + 40, id: 4 },
+                    { x: w / 2 + 20, y: h / 2 + 40, id: 5 },
+                    { x: w / 2 + 80, y: h / 2 + 40, id: 6 }
+                ];
+                
+                const edges = [
+                    [0, 1], [0, 2],
+                    [1, 3], [1, 4],
+                    [2, 5], [2, 6]
+                ];
+
+                mctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+                mctx.lineWidth = 1.5;
+                edges.forEach(e => {
+                    mctx.beginPath();
+                    mctx.moveTo(nodes[e[0]].x, nodes[e[0]].y);
+                    mctx.lineTo(nodes[e[1]].x, nodes[e[1]].y);
+                    mctx.stroke();
+                });
+
+                const activeNodeIndex = Math.floor(time * 2.5) % nodes.length;
+                
+                nodes.forEach((n, idx) => {
+                    const isActive = idx === activeNodeIndex;
+                    mctx.fillStyle = isActive ? color : '#0f0f2a';
+                    mctx.strokeStyle = color;
+                    mctx.lineWidth = 2;
+                    mctx.beginPath();
+                    mctx.arc(n.x, n.y, isActive ? 8 : 6, 0, Math.PI * 2);
+                    mctx.fill();
+                    mctx.stroke();
+
+                    if (isActive) {
+                        mctx.shadowColor = color;
+                        mctx.shadowBlur = 12;
+                        mctx.fillStyle = '#ffffff';
+                        mctx.beginPath();
+                        mctx.arc(n.x, n.y, 3, 0, Math.PI * 2);
+                        mctx.fill();
+                        mctx.shadowBlur = 0;
+                    }
+                });
+
+            } else if (selectedProject.type === 'analytics') {
+                // Line graph with bar chart statistics overlay
+                const center = { x: w / 2, y: h / 2 };
+                const gw = 180;
+                const gh = 100;
+                const gx = center.x - gw / 2;
+                const gy = center.y - gh / 2;
+
+                mctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+                mctx.lineWidth = 1;
+                mctx.beginPath();
+                for (let dx = 0; dx <= gw; dx += 20) {
+                    mctx.moveTo(gx + dx, gy);
+                    mctx.lineTo(gx + dx, gy + gh);
+                }
+                for (let dy = 0; dy <= gh; dy += 20) {
+                    mctx.moveTo(gx, gy + dy);
+                    mctx.lineTo(gx + gw, gy + dy);
+                }
+                mctx.stroke();
+
+                mctx.fillStyle = `${color}22`;
+                const numBars = 9;
+                const bw = gw / numBars - 4;
+                for (let j = 0; j < numBars; j++) {
+                    const hval = 20 + Math.sin(time * 1.5 + j * 0.8) * 30 + 30;
+                    mctx.fillRect(gx + j * (gw / numBars) + 2, gy + gh - hval, bw, hval);
+                }
+
+                mctx.strokeStyle = color;
+                mctx.lineWidth = 3;
+                mctx.beginPath();
+                for (let j = 0; j <= 20; j++) {
+                    const tx = gx + (j / 20) * gw;
+                    const ty = gy + gh - (20 + Math.sin(time * 2 + j * 0.2) * 25 + Math.cos(time + j * 0.1) * 15 + 40);
+                    if (j === 0) mctx.moveTo(tx, ty);
+                    else mctx.lineTo(tx, ty);
+                }
+                mctx.stroke();
+
+                mctx.fillStyle = 'rgba(255,255,255,0.4)';
+                mctx.font = '8px "Orbitron", monospace';
+                mctx.textAlign = 'left';
+                mctx.fillText(`DELINQUENCY RISK R-SQ: 0.942`, gx, gy - 8);
+
+            } else if (selectedProject.type === 'matrix') {
+                // Falling matrix style code lines and concentric circular rings
+                const center = { x: w / 2, y: h / 2 };
+                
+                mctx.strokeStyle = `${color}33`;
+                mctx.lineWidth = 1;
+                mctx.beginPath();
+                mctx.arc(center.x, center.y, 40, 0, Math.PI * 2);
+                mctx.arc(center.x, center.y, 80, 0, Math.PI * 2);
+                mctx.stroke();
+
+                mctx.fillStyle = color;
+                mctx.shadowColor = color;
+                mctx.shadowBlur = 15;
+                mctx.beginPath();
+                mctx.arc(center.x, center.y, 8, 0, Math.PI * 2);
+                mctx.fill();
+                mctx.shadowBlur = 0;
+
+                mctx.strokeStyle = color;
+                mctx.lineWidth = 3;
+                mctx.beginPath();
+                mctx.arc(center.x, center.y, 60, time * 0.8, time * 0.8 + 1.2);
+                mctx.stroke();
+                mctx.beginPath();
+                mctx.arc(center.x, center.y, 60, time * 0.8 + Math.PI, time * 0.8 + Math.PI + 1.2);
+                mctx.stroke();
+
+                mctx.fillStyle = color;
+                mctx.font = '9px "Orbitron", monospace';
+                mctx.textAlign = 'center';
+                for (let j = 0; j < 5; j++) {
+                    const tx = center.x - 100 + j * 50;
+                    const ty = ((time * 60 + j * 30) % (h - 40)) + 20;
+                    const char = String.fromCharCode(33 + Math.floor(Math.random() * 90));
+                    mctx.fillText(char, tx, ty);
+                }
+
+            } else if (selectedProject.type === 'cyber') {
+                // Grid security scanners and firewall status
+                const center = { x: w / 2, y: h / 2 };
+                const baseRad = Math.min(w, h) * 0.35;
+
+                mctx.strokeStyle = color;
+                mctx.lineWidth = 2.5;
+                mctx.beginPath();
+                for (let j = 0; j < 6; j++) {
+                    const angle = (j / 6) * Math.PI * 2 + time * 0.15;
+                    const hx = center.x + Math.cos(angle) * baseRad;
+                    const hy = center.y + Math.sin(angle) * baseRad;
+                    if (j === 0) mctx.moveTo(hx, hy);
+                    else mctx.lineTo(hx, hy);
+                }
+                mctx.closePath();
+                mctx.stroke();
+
+                mctx.strokeStyle = `${color}22`;
+                mctx.lineWidth = 1;
+                mctx.beginPath();
+                for (let j = 0; j < 6; j++) {
+                    const angle = (j / 6) * Math.PI * 2 + time * 0.15;
+                    mctx.moveTo(center.x, center.y);
+                    mctx.lineTo(center.x + Math.cos(angle) * baseRad, center.y + Math.sin(angle) * baseRad);
+                }
+                mctx.stroke();
+
+                const pulseRad = (time * 80) % baseRad;
+                mctx.strokeStyle = color;
+                mctx.lineWidth = 1.5;
+                mctx.beginPath();
+                mctx.arc(center.x, center.y, pulseRad, 0, Math.PI * 2);
+                mctx.stroke();
+
+                mctx.fillStyle = '#ffffff';
+                mctx.font = 'bold 9px "Orbitron", sans-serif';
+                mctx.textAlign = 'center';
+                mctx.fillText('FW-CORE: THREAT BLOCKED', center.x, center.y + 4);
+
+            } else if (selectedProject.type === 'neural') {
+                // Fully connected neural net layer nodes with feedforward signals
+                const layers = [3, 4, 3];
+                const layerSpacing = w / 4;
+                const nodes = [];
+
+                layers.forEach((count, lIdx) => {
+                    const lx = layerSpacing * (lIdx + 1);
+                    const colH = h * 0.7;
+                    const startY = h / 2 - colH / 2;
+                    const spacing = colH / (count + 1);
+
+                    for (let j = 0; j < count; j++) {
+                        nodes.push({
+                            x: lx,
+                            y: startY + spacing * (j + 1),
+                            layer: lIdx
+                        });
+                    }
+                });
+
+                mctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                mctx.lineWidth = 1;
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = 0; j < nodes.length; j++) {
+                        if (nodes[i].layer + 1 === nodes[j].layer) {
+                            mctx.beginPath();
+                            mctx.moveTo(nodes[i].x, nodes[i].y);
+                            mctx.lineTo(nodes[j].x, nodes[j].y);
+                            mctx.stroke();
+                        }
+                    }
+                }
+
+                mctx.fillStyle = color;
+                const speed = 1.2;
+                const progress = (time * speed) % 2;
+                
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = 0; j < nodes.length; j++) {
+                        if (nodes[i].layer + 1 === nodes[j].layer) {
+                            const px = nodes[i].x + (nodes[j].x - nodes[i].x) * (progress / 2);
+                            const py = nodes[i].y + (nodes[j].y - nodes[i].y) * (progress / 2);
+                            mctx.beginPath();
+                            mctx.arc(px, py, 2.5, 0, Math.PI * 2);
+                            mctx.fill();
+                        }
+                    }
+                }
+
+                nodes.forEach(n => {
+                    mctx.fillStyle = '#0a0a20';
+                    mctx.strokeStyle = color;
+                    mctx.lineWidth = 2;
+                    mctx.beginPath();
+                    mctx.arc(n.x, n.y, 5, 0, Math.PI * 2);
+                    mctx.fill();
+                    mctx.stroke();
+                });
+            }
+        }
+
+        // ============================================================
+        // 9. WINDOW RESIZE HANDLER
+        // ============================================================
+        window.addEventListener('resize', () => {
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            
+            renderer.setSize(w, h);
+        });
+
+        // ============================================================
+        // 10. MAIN ANIMATION LOOP
+        // ============================================================
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const time = clock.getElapsedTime();
+            const delta = clock.getDelta();
+
+            // --- 10A. LERP GRAVITY CORE VARIABLES ---
+            currentGravity += (targetGravity - currentGravity) * 0.08;
+
+            // --- 10B. CAMERA POSITION LERPING ---
+            currentCameraPos.lerp(targetCameraPos, 0.06);
+            currentCameraLookAt.lerp(targetCameraLookAt, 0.06);
+            
+            camera.position.copy(currentCameraPos);
+            camera.lookAt(currentCameraLookAt);
+
+            // --- 10C. HERO ANIMATION ---
+            // Floating oscillations
+            hero.position.y = Math.sin(time * hero.userData.floatSpeed) * hero.userData.floatAmp * currentGravity;
+            hero.rotation.x += hero.userData.rotSpeed * currentGravity;
+            hero.rotation.y += hero.userData.rotSpeed * 1.25 * currentGravity;
+            hero.rotation.z += hero.userData.rotSpeed * 0.8 * currentGravity;
+
+            // Breathing scaling
+            const breathing = 1 + Math.sin(time * 0.8) * 0.035;
+            hero.scale.set(breathing, breathing, breathing);
+
+            // Dynamic emissive breathing
+            const coreGlow = 0.15 + (Math.sin(time * 2.2) * 0.5 + 0.5) * 0.4;
+            heroMat.emissiveIntensity = coreGlow * currentGravity;
+
+            // Outer shell counter-rotations
+            wireShell.rotation.x -= hero.userData.rotSpeed * 0.4 * currentGravity;
+            wireShell.rotation.y -= hero.userData.rotSpeed * 0.6 * currentGravity;
+            wireShell.rotation.z -= hero.userData.rotSpeed * 0.25 * currentGravity;
+            wireShell.position.copy(hero.position);
+
+            // --- 10D. PROJECT CARDS ORBITS ---
+            // Run Raycasting hover calculations
+            raycaster.setFromCamera(mouse3D, camera);
+            const intersects = raycaster.intersectObjects(projectCards, true);
+
+            // Reset hover state flags
+            projectCards.forEach(c => c.userData.isHovered = false);
+            let activeHoveredCard = null;
+
+            if (intersects.length > 0) {
+                let hitObj = intersects[0].object;
+                // Climb hierarchies to match registered card groupings
+                while (hitObj.parent && !projectCards.includes(hitObj)) {
+                    hitObj = hitObj.parent;
+                }
+                if (projectCards.includes(hitObj)) {
+                    hitObj.userData.isHovered = true;
+                    activeHoveredCard = hitObj;
+                }
+            }
+
+            // Adjust custom hover cursors
+            if (activeHoveredCard && activeCameraState !== 'DETAIL') {
+                customCursor.classList.add('hovering-card');
+                cursorDot.classList.add('hovering-card');
+            } else {
+                customCursor.classList.remove('hovering-card');
+                cursorDot.classList.remove('hovering-card');
+            }
+
+            projectCards.forEach((group, i) => {
+                const data = group.userData;
+
+                // Calculate next orbit angles
+                // Decrease rotation if card is hovered (user can grab to view)
+                const orbitSpeedDamp = data.isHovered ? 0.05 : 1.0;
+                data.orbitAngle += data.orbitSpeed * 0.006 * currentGravity * orbitSpeedDamp;
+
+                const x = Math.cos(data.orbitAngle) * data.orbitRadius;
+                const z = Math.sin(data.orbitAngle) * data.orbitRadius;
+                const y = Math.sin(data.orbitAngle * 0.7 + data.phase) * 0.4 +
+                    Math.sin(time * data.floatSpeed + data.phase) * data.floatAmp * currentGravity;
+
+                group.position.set(x, y, z);
+
+                // Smooth quaternions slerp rotations
+                const startRot = group.quaternion.clone();
+                if (data.isHovered || activeCameraState === 'DETAIL' && selectedProject && selectedProject.id === data.project.id) {
+                    group.lookAt(camera.position);
+                } else {
+                    group.lookAt(0, y * 0.5, 0);
+                }
+                const targetRot = group.quaternion.clone();
+                group.quaternion.copy(startRot);
+                group.quaternion.slerp(targetRot, 0.08);
+
+                // Hover scaling lerp animations
+                data.targetScale = data.isHovered ? 1.3 : 1.0;
+                data.hoverScale += (data.targetScale - data.hoverScale) * 0.12;
+                group.scale.set(data.hoverScale, data.hoverScale, data.hoverScale);
+
+                // Emissive updates
+                const frontMaterial = group.children[0].material[4];
+                if (frontMaterial) {
+                    const pulseGlow = Math.sin(time * 0.6 + i * 2) * 0.5 + 0.5;
+                    frontMaterial.emissiveIntensity = (data.isHovered ? 0.95 : 0.18) + pulseGlow * 0.1;
+                }
+            });
+
+            // --- 10E. FLOATING DEBRIS ANIMATIONS ---
+            shapes.forEach(mesh => {
+                const data = mesh.userData;
+
+                // Rotation offsets
+                mesh.rotation.x += data.rotSpeed.x * currentGravity;
+                mesh.rotation.y += data.rotSpeed.y * currentGravity;
+                mesh.rotation.z += data.rotSpeed.z * currentGravity;
+
+                // Float wave offsets
+                data.phase += data.floatSpeed * 0.008 * currentGravity;
+                mesh.position.y = data.initialPos.y + Math.sin(data.phase) * data.floatAmp * currentGravity;
+
+                // Kinetic drift physics (bursts)
+                mesh.position.add(data.driftSpeed);
+                data.driftSpeed.multiplyScalar(0.96); // Drag coefficient
+
+                // Spring attraction force pulling debris to initial radius
+                const restoringVec = data.initialPos.clone().sub(mesh.position);
+                mesh.position.addScaledVector(restoringVec, 0.015);
+            });
+
+            // --- 10F. PARTICLES TWINKLE & DRIFT ---
+            particleSystem.rotation.y += 0.0004 * currentGravity;
+            particleSystem.rotation.x += 0.00015 * currentGravity;
+            particleMat.opacity = 0.55 + Math.sin(time * 1.8) * 0.25;
+
+            // --- 10G. CUSTOM CURSOR HTML DAMPING ---
+            cursorPos.x += (mouse.rawX - cursorPos.x) * 0.18;
+            cursorPos.y += (mouse.rawY - cursorPos.y) * 0.18;
+            
+            customCursor.style.left = `${cursorPos.x}px`;
+            customCursor.style.top = `${cursorPos.y}px`;
+            cursorDot.style.left = `${mouse.rawX}px`;
+            cursorDot.style.top = `${mouse.rawY}px`;
+
+            // --- 10H. DRAW MODAL REAL-TIME TELMETRY SCREEN ---
+            if (isModalActive) {
+                drawModalVisualization(time);
+            }
+
+            // --- 10I. RENDER CALL ---
+            renderer.render(scene, camera);
+        }
+
+        // ============================================================
+        // 11. CLICK & SELECTION ROUTER
+        // ============================================================
+        document.addEventListener('click', () => {
+            // Block clicks on cards if modal is already open
+            if (isModalActive) return;
+
+            raycaster.setFromCamera(mouse3D, camera);
+            const intersects = raycaster.intersectObjects(projectCards, true);
+
+            if (intersects.length > 0) {
+                let hitObj = intersects[0].object;
+                while (hitObj.parent && !projectCards.includes(hitObj)) {
+                    hitObj = hitObj.parent;
+                }
+                if (projectCards.includes(hitObj)) {
+                    showProjectDetails(hitObj.userData.project);
+                }
+            }
+        });
+
+        // Initialize scene animate call
+        animate();
+    </script>
+</body>
+</html>
